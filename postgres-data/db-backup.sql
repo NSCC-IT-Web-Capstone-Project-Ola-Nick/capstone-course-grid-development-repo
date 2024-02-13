@@ -52,6 +52,21 @@ INSERT INTO "courses" ("id", "courseName", "userId", "dateCreated", "dateUpdated
 (31,	'Potions',	1,	'2024-02-10 17:51:44.39',	'2024-02-10 17:51:44.39',	'f',	NULL),
 (32,	'Potions',	1,	'2024-02-10 17:51:44.39',	'2024-02-10 17:51:44.39',	'f',	NULL);
 
+DROP TABLE IF EXISTS "fileUploads";
+DROP SEQUENCE IF EXISTS "fileUploads_id_seq";
+CREATE SEQUENCE "fileUploads_id_seq" INCREMENT  MINVALUE  MAXVALUE  CACHE ;
+
+CREATE TABLE "public"."fileUploads" (
+    "id" integer DEFAULT nextval('"fileUploads_id_seq"') NOT NULL,
+    "fileUniqueName" character varying(250) NOT NULL,
+    "userId" integer NOT NULL,
+    "lessonId" integer NOT NULL,
+    "fileDisplayName" character varying(250) NOT NULL,
+    CONSTRAINT "fileUploads_pkey" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+TRUNCATE "fileUploads";
+
 DROP TABLE IF EXISTS "lessons";
 DROP SEQUENCE IF EXISTS lessons_id_seq;
 CREATE SEQUENCE lessons_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
@@ -79,6 +94,20 @@ INSERT INTO "lessons" ("id", "lessonName", "lessonNumber", "completionStatus", "
 (6,	'Lesson Name 6',	6,	'not prepped',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'2024-02-13 14:02:07.912',	'2024-02-13 14:02:07.912',	3),
 (7,	'Lesson Name 7',	7,	'done',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'2024-02-13 14:02:39.538',	'2024-02-13 14:02:39.538',	4),
 (8,	'Lesson Name 8',	8,	'not prepped',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum veniam sint fugit, animi ipsum, natus ex quod pariatur aut, repellendus harum totam nulla nostrum commodi.',	'2024-02-13 14:02:59.13',	'2024-02-13 14:02:59.13',	4);
+
+DROP TABLE IF EXISTS "notes";
+DROP SEQUENCE IF EXISTS notes_id_seq;
+CREATE SEQUENCE notes_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."notes" (
+    "id" integer DEFAULT nextval('notes_id_seq') NOT NULL,
+    "note" text NOT NULL,
+    "userId" integer NOT NULL,
+    "lessonId" integer NOT NULL,
+    CONSTRAINT "notes_pkey" PRIMARY KEY ("id")
+) WITH (oids = false);
+
+TRUNCATE "notes";
 
 DROP TABLE IF EXISTS "thumbnails";
 DROP SEQUENCE IF EXISTS thumbnails_id_seq;
@@ -140,10 +169,16 @@ INSERT INTO "users" ("id", "email", "password", "firstName", "lastName", "title"
 
 ALTER TABLE ONLY "public"."courses" ADD CONSTRAINT "courses_userId_fkey" FOREIGN KEY ("userId") REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
 
+ALTER TABLE ONLY "public"."fileUploads" ADD CONSTRAINT "fileUploads_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES lessons(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
+ALTER TABLE ONLY "public"."fileUploads" ADD CONSTRAINT "fileUploads_userId_fkey" FOREIGN KEY ("userId") REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
+
 ALTER TABLE ONLY "public"."lessons" ADD CONSTRAINT "lessons_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES units(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
+
+ALTER TABLE ONLY "public"."notes" ADD CONSTRAINT "notes_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES lessons(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
+ALTER TABLE ONLY "public"."notes" ADD CONSTRAINT "notes_userId_fkey" FOREIGN KEY ("userId") REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
 
 ALTER TABLE ONLY "public"."thumbnails" ADD CONSTRAINT "thumbnails_userId_fkey" FOREIGN KEY ("userId") REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
 
 ALTER TABLE ONLY "public"."units" ADD CONSTRAINT "units_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES courses(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
 
--- 2024-02-13 14:05:31.960078+00
+-- 2024-02-13 14:14:15.880196+00
